@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fenestra — Window & Door Quote Builder</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232c; --line:#2a323d;
+    --txt:#e6edf3; --dim:#8b97a5; --accent:#e8a33d; --good:#3fb950; --bad:#f85149;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;align-items:baseline;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+  header h1{margin:0;font-size:17px;letter-spacing:.2px}
+  header .tag{font-size:12px;color:var(--dim)}
+  header .tag b{color:var(--accent);font-weight:600}
+  main{display:grid;grid-template-columns:352px 1fr;gap:18px;padding:18px 22px;align-items:start}
+  @media (max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .card h2{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);font-weight:600}
+  .card h3{margin:16px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);font-weight:600;border-top:1px solid var(--line);padding-top:12px}
+  label{display:block;margin-bottom:10px}
+  label span{display:block;font-size:12px;color:var(--dim);margin-bottom:4px}
+  select,input[type=number],input[type=text]{width:100%;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:8px 9px;font:inherit}
+  select:focus,input:focus{outline:none;border-color:var(--accent)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-bottom:10px}
+  .seg button{flex:1;background:var(--panel2);color:var(--dim);border:0;border-right:1px solid var(--line);padding:7px 4px;font:inherit;font-size:11px;cursor:pointer}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--accent);color:#141414;font-weight:600}
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px}
+  svg{width:100%;height:auto;max-height:360px;background:linear-gradient(0deg,rgba(255,255,255,.02),rgba(255,255,255,.02));border-radius:8px}
+  .meta{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+  .meta b{color:var(--txt);font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);font-weight:600}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.sub td{border-top:1px solid var(--line);color:var(--dim);padding-top:8px}
+  .total{display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;font-size:15px}
+  .total b{font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}
+  .warn{color:var(--bad);font-size:12px;margin-top:8px}
+  .warn ul{margin:4px 0 0;padding-left:18px}
+  .ok{color:var(--good)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:1100px){.cols{grid-template-columns:1fr}}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:inherit;font-size:12px;cursor:pointer}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  .chip i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.25)}
+  footer{padding:10px 22px 26px;color:var(--dim);font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Fenestra</h1>
+  <span class="tag">Window &amp; door quote configurator — <b>demo rates, not supplier pricing</b></span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Configuration</h2>
+
+    <label><span>Operation</span>
+      <select id="op">
+        <option value="sliding2" selected>Sliding — 2 panel</option>
+        <option value="sliding3">Sliding — 3 panel</option>
+        <option value="sliding4">Sliding — 4 panel</option>
+        <option value="casement1">Casement — 1 sash</option>
+        <option value="casement2">Casement — 2 sash</option>
+        <option value="awning">Awning / top-hung</option>
+        <option value="fixed">Fixed / picture</option>
+        <option value="door2">Sliding door — 2 panel</option>
+      </select>
+    </label>
+
+    <div class="row">
+      <label><span>Width DLO (mm)</span><input id="w" type="number" value="1800" min="300" max="6000" step="10"></label>
+      <label><span>Height DLO (mm)</span><input id="h" type="number" value="1500" min="300" max="3000" step="10"></label>
+    </div>
+
+    <label><span>Measure type</span>
+      <select id="measure">
+        <option value="std" selected>Std RO</option>
+        <option value="masonry">Masonry — top of riser / bottom of head</option>
+        <option value="none">DLO only (no opening rule)</option>
+      </select>
+    </label>
+
+    <h3>Order</h3>
+    <div class="row">
+      <label><span>Quantity</span><input id="qty" type="number" value="1" min="1" max="200" step="1"></label>
+      <label><span>Profile series</span>
+        <select id="series">
+          <option value="50">50 mm</option>
+          <option value="70" selected>70 mm</option>
+          <option value="100">100 mm</option>
+        </select>
+      </label>
+    </div>
+
+    <label><span>Item type</span>
+      <select id="itemType">
+        <option value="custom" selected>Custom design — built to order</option>
+        <option value="stdDesign">Std design — saved template</option>
+        <option value="stdSize">Std size product — fixed SKU</option>
+        <option value="stdEditable">Std editable product</option>
+        <option value="stock">Stock product — from inventory</option>
+      </select>
+    </label>
+
+    <h3>Finish</h3>
+    <div class="row">
+      <label><span>Exterior colour</span><select id="colourExt"></select></label>
+      <label><span>Interior colour</span><select id="colourInt"></select></label>
+    </div>
+    <div class="bar" style="margin-bottom:10px">
+      <span class="chip"><i id="swExt"></i> ext</span>
+      <span class="chip"><i id="swInt"></i> int</span>
+      <span id="twoTone" class="chip" style="display:none">dual colour</span>
+    </div>
+
+    <h3>Glazing &amp; hardware</h3>
+    <label><span>Glass</span>
+      <select id="glass">
+        <option value="clear">Clear 6 mm</option>
+        <option value="lam" selected>Laminated 6.38 mm</option>
+        <option value="temp">Tempered 6 mm</option>
+        <option value="dgu">Double 6+12+6</option>
+      </select>
+    </label>
+
+    <div class="row">
+      <label><span>Hardware</span>
+        <select id="hw">
+          <option value="none">None (fixed)</option>
+          <option value="std" selected>Standard</option>
+          <option value="prem">Premium</option>
+        </select>
+      </label>
+      <label><span>Rush order</span>
+        <select id="rush">
+          <option value="no" selected>Not required</option>
+          <option value="yes">Required</option>
+        </select>
+      </label>
+    </div>
+
+    <label><span>Insect screen <input id="screen" type="checkbox" style="width:auto;margin-left:6px"></span></label>
+
+    <label><span>Margin — <b id="marginLbl">35%</b></span>
+      <input id="margin" type="range" min="10" max="60" value="35" step="1">
+    </label>
+  </section>
+
+  <section class="stage">
+    <svg id="dwg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Elevation drawing"></svg>
+
+    <div class="bar">
+      <span class="meta" style="flex:1">
+        <span>DLO <b id="mSize">—</b></span>
+        <span>RO <b id="mRo">—</b></span>
+        <span>Area <b id="mArea">—</b></span>
+        <span>Panels <b id="mPanels">—</b></span>
+        <span>Bar <b id="mBar">—</b></span>
+      </span>
+      <button class="btn" id="dxfBtn">Download DXF</button>
+    </div>
+
+    <div id="warn" class="warn"></div>
+
+    <div class="cols">
+      <div>
+        <h2 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)">Quote</h2>
+        <table id="quote"></table>
+        <div class="total"><span>Total <small id="vatNote" style="color:var(--dim)">(excl. VAT)</small></span><b id="total">₱0</b></div>
+        <div class="meta" style="margin-top:6px"><span>Per m² <b id="perM2">—</b></span><span>Per unit <b id="perUnit">—</b></span></div>
+      </div>
+      <div>
+        <h2 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)">Cut list</h2>
+        <table id="cut"></table>
+        <h2 style="margin:14px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)">Glass</h2>
+        <table id="glassOut"></table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Prototype for internal testing. Rates are placeholders — swap in a supplier's price list before showing a customer.
+  RO rules, item types, option/answer model and dual-colour finish follow the OpenJanela domain model
+  (<code>docs/research/openjanela-domain-model.md</code>). Cut deductions are simplified; confirm against the actual profile system.
+</footer>
+
+<script>
+/* ---------- domain data ---------- */
+
+// Answers carry stock code, abbreviation and colour — the drawing is driven by the answer,
+// not by the product. Same shape as OpenJanela's optionAnswers[].
+const COLOURS = [
+  { code:"WH", name:"White",      rgb:[242,242,240] },
+  { code:"CL", name:"Clay",       rgb:[200,184,166] },
+  { code:"SD", name:"Sandstone",  rgb:[216,203,176] },
+  { code:"GR", name:"Green",      rgb:[74,95,74] },
+  { code:"BK", name:"Black",      rgb:[26,26,26] },
+  { code:"AL", name:"Almond",     rgb:[232,220,200] },
+  { code:"ML", name:"Mill",       rgb:[196,200,204] },
+  { code:"AN", name:"Anodised",   rgb:[176,180,184] },
+  { code:"CU", name:"Custom",     rgb:[128,128,128], custom:true }
+];
+
+const SERIES = {
+  50:  { face:50,  rebate:10, stile:32, sashClear:3, overlap:18, rate:420, maxPanelW:1200, maxH:2100 },
+  70:  { face:70,  rebate:12, stile:35, sashClear:3, overlap:20, rate:560, maxPanelW:1500, maxH:2400 },
+  100: { face:100, rebate:15, stile:42, sashClear:4, overlap:24, rate:720, maxPanelW:1800, maxH:2700 }
+};
+
+// RO rule set per measure type, in mm. OpenJanela stores these per series
+// (adjustmentRo: row/roh in mm, rowi/rohi in 1/32 in). These are our defaults.
+const RO_RULES = {
+  std:     { wAdd:13, hAdd:13, label:"Std RO" },          // 13 mm ≈ 1/2 in total
+  masonry: { wAdd:102, hAdd:64, headExtra:0, label:"Masonry" }, // 4 in W, 2.5 in H
+  none:    { wAdd:0, hAdd:0, label:"DLO" }
+};
+
+// Item type selects the price list. Catalogue work is cheaper per unit than bespoke.
+const ITEM_TYPES = {
+  custom:      { label:"Custom design",     profile:1.00, glass:1.00, hw:1.00, labour:1.00, setup:0 },
+  stdDesign:   { label:"Std design",        profile:0.94, glass:0.96, hw:0.96, labour:0.94, setup:0 },
+  stdSize:     { label:"Std size product",  profile:0.86, glass:0.88, hw:0.90, labour:0.86, setup:0 },
+  stdEditable: { label:"Std editable",      profile:0.90, glass:0.92, hw:0.93, labour:0.90, setup:0 },
+  stock:       { label:"Stock product",     profile:0.80, glass:0.84, hw:0.85, labour:0.70, setup:0 }
+};
+
+const RATES = {
+  glass:    { clear:850, lam:1450, temp:1900, dgu:2600 },   // ₱/m²
+  hardware: { none:0, std:1200, prem:2600 },                // ₱/leaf
+  screen:   450,                                            // ₱/leaf
+  labour:   650,                                            // ₱/m²
+  stock:    6000,                                           // mm bar length
+  customColour: 0.12,                                       // +12% on profile
+  twoTone:      0.08,                                       // +8% on profile for dual colour
+  rush:         0.15                                        // +15% on subtotal
+};
+
+const OPS = {
+  sliding2:{ kind:"sliding", panels:2, leaves:2, label:"Sliding 2 panel" },
+  sliding3:{ kind:"sliding", panels:3, leaves:3, label:"Sliding 3 panel" },
+  sliding4:{ kind:"sliding", panels:4, leaves:4, label:"Sliding 4 panel" },
+  casement1:{ kind:"casement", panels:1, leaves:1, label:"Casement" },
+  casement2:{ kind:"casement", panels:2, leaves:2, label:"Casement 2 sash" },
+  awning:{ kind:"casement", panels:1, leaves:1, label:"Awning" },
+  fixed:{ kind:"fixed", panels:1, leaves:0, label:"Fixed" },
+  door2:{ kind:"sliding", panels:2, leaves:2, label:"Sliding door", door:true }
+};
+
+/* ---------- helpers ---------- */
+const el = id => document.getElementById(id);
+const peso = n => "₱" + Math.round(n).toLocaleString("en-PH");
+const num = n => Math.round(n).toLocaleString("en-PH");
+const mmToIn = mm => mm / 25.4;
+function fracIn(mm){
+  const inches = mmToIn(mm);
+  const whole = Math.floor(inches);
+  let n = Math.round((inches - whole) * 16);
+  let d = 16;
+  while (n && n % 2 === 0){ n /= 2; d /= 2; }
+  return n ? `${whole} ${n}/${d}"` : `${whole}"`;
+}
+const rgbCss = a => `rgb(${a[0]},${a[1]},${a[2]})`;
+
+/* ---------- geometry ---------- */
+function buildModel(cfg){
+  const P = SERIES[cfg.series];
+  const O = OPS[cfg.op];
+  const F = P.face, REB = P.rebate, STILE = P.stile;
+  const { w, h } = cfg;
+
+  const members = [];
+  const panes = [];
+  const add = (name, len, qty=1) => members.push({ name, len: Math.round(len), qty });
+
+  let panels = 1, leaves = 0;
+
+  if (O.kind === "fixed"){
+    panels = 1; leaves = 0;
+    add("Head / sill", w, 2);
+    add("Jamb", h, 2);
+    panes.push({ w: w - 2*F + 2*REB, h: h - 2*F + 2*REB });
+  }
+  else if (O.kind === "sliding"){
+    panels = O.panels; leaves = O.leaves;
+    add("Track head", w);
+    add("Track sill", w);
+    add("Jamb", h, 2);
+    const panelW = (w - 2*F + P.overlap*(panels-1)) / panels;
+    const panelH = h - 2*F - 2;
+    add("Panel stile", panelH, 2*panels);
+    add("Panel rail", panelW, 2*panels);
+    add("Meeting stile", panelH, panels);
+    for (let i=0;i<panels;i++) panes.push({ w: panelW - 2*STILE, h: panelH - 2*STILE });
+    panels = panels;
+  }
+  else {
+    panels = O.panels; leaves = O.leaves;
+    add("Head", w);
+    add("Sill", w);
+    add("Jamb", h, 2);
+    if (panels === 2){
+      add("Mullion", h);
+      const sashW = (w - 2*F - P.sashClear*3) / 2;
+      const sashH = h - 2*F - P.sashClear*2;
+      add("Sash stile", sashH, 4);
+      add("Sash rail", sashW, 4);
+      panes.push({ w: sashW - 2*STILE, h: sashH - 2*STILE });
+      panes.push({ w: sashW - 2*STILE, h: sashH - 2*STILE });
+    } else {
+      const sashW = w - 2*F - P.sashClear*2;
+      const sashH = h - 2*F - P.sashClear*2;
+      add("Sash stile", sashH, 2);
+      add("Sash rail", sashW, 2);
+      panes.push({ w: sashW - 2*STILE, h: sashH - 2*STILE });
+    }
+  }
+
+  const totalLen = members.reduce((s,m)=> s + m.len*m.qty, 0);
+  const glassArea = panes.reduce((s,p)=> s + Math.max(0,p.w)*Math.max(0,p.h), 0) / 1e6;
+  return { members, panes, panels, leaves, totalLen, glassArea, P, O };
+}
+
+function roughOpening(cfg){
+  const rule = RO_RULES[cfg.measure];
+  return {
+    w: cfg.w + rule.wAdd,
+    h: cfg.h + rule.hAdd + (rule.headExtra || 0),
+    rule
+  };
+}
+
+/* ---------- pricing ---------- */
+function price(cfg, model){
+  const P = model.P, T = ITEM_TYPES[cfg.itemType];
+  const qty = cfg.qty;
+  const area = (cfg.w*cfg.h/1e6) * qty;
+  const profileM = (model.totalLen/1000) * qty;
+
+  let colourFactor = 1;
+  const ext = COLOURS.find(c=>c.code===cfg.colourExt);
+  const int = COLOURS.find(c=>c.code===cfg.colourInt);
+  if (ext.custom || int.custom) colourFactor += RATES.customColour;
+  const twoTone = cfg.colourExt !== cfg.colourInt;
+  if (twoTone) colourFactor += RATES.twoTone;
+
+  const profile = profileM * P.rate * T.profile * colourFactor;
+  const glassCost = model.glassArea * qty * RATES.glass[cfg.glass] * T.glass;
+  const hardware = model.leaves * RATES.hardware[cfg.hw] * qty * T.hw;
+  const screen = cfg.screen ? model.leaves * RATES.screen * qty : 0;
+  const labour = area * RATES.labour * T.labour;
+  const sub0 = profile + glassCost + hardware + screen + labour;
+  const rush = cfg.rush === "yes" ? sub0 * RATES.rush : 0;
+  const sub = sub0 + rush;
+  const margin = sub * (cfg.margin/100);
+  return { area, profileM, profile, glassCost, hardware, screen, labour, rush, sub, margin,
+           total: sub + margin, twoTone, colourFactor };
+}
+
+/* ---------- warnings ---------- */
+function warnings(cfg, model){
+  const out = [];
+  const P = model.P, O = model.O;
+  const { w, h } = cfg;
+  if (w < 400 || h < 400) out.push("Smaller than 400 mm — check against the profile system's minimum.");
+  if (O.kind === "sliding"){
+    const pw = (w - 2*P.face + P.overlap*(O.panels-1)) / O.panels;
+    if (pw > P.maxPanelW) out.push(`Panel width ${num(pw)} mm exceeds the ${num(P.maxPanelW)} mm limit for the ${cfg.series} mm series — go to a heavier series.`);
+    if (O.door && h < 2000) out.push("Sliding door under 2000 mm — confirm it is not a pass-through window.");
+  }
+  if (h > P.maxH) out.push(`Over ${num(P.maxH)} mm high — needs a transom or a heavier series.`);
+  if (w/h > 4) out.push("Very wide and shallow — check wind load.");
+  if (cfg.glass === "clear" && (h > 1800 || w > 1800)) out.push("Large clear glass — tempered or laminated is the safer default.");
+  if (cfg.colourExt === "BK" && cfg.measure === "none") out.push("Dark frame with no RO rule — heat gain on the profile; confirm expansion allowance.");
+  return out;
+}
+
+/* ---------- drawing ---------- */
+function draw(cfg, model, ro){
+  const svg = el("dwg");
+  const pad = 46, W = 600, H = 400;
+  const { w, h } = cfg;
+  const s = Math.min((W-2*pad)/w, (H-2*pad)/h);
+  const dw = w*s, dh = h*s;
+  const x0 = (W-dw)/2, y0 = (H-dh)/2;
+  const F = Math.max(3, model.P.face * s);
+  const ext = COLOURS.find(c=>c.code===cfg.colourExt);
+  const int = COLOURS.find(c=>c.code===cfg.colourInt);
+  const frameCol = rgbCss(ext.rgb);
+  const innerCol = rgbCss(int.rgb);
+  const parts = [];
+
+  // shadow / opening
+  parts.push(`<rect x="${x0-3}" y="${y0-3}" width="${dw+6}" height="${dh+6}" fill="#080b0f"/>`);
+  parts.push(`<rect x="${x0}" y="${y0}" width="${dw}" height="${dh}" fill="${frameCol}" stroke="rgba(0,0,0,.55)" stroke-width="1.5"/>`);
+  parts.push(`<rect x="${x0+F}" y="${y0+F}" width="${dw-2*F}" height="${dh-2*F}" fill="${innerCol}" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`);
+
+  const glassFill = 'fill="rgba(120,190,235,.18)" stroke="rgba(150,210,245,.6)" stroke-width="1"';
+  const gx0 = x0 + F, gy0 = y0 + F, gw = dw - 2*F, gh = dh - 2*F;
+
+  if (model.panels === 1){
+    parts.push(`<rect x="${gx0}" y="${gy0}" width="${gw}" height="${gh}" ${glassFill}/>`);
+  } else if (model.O.kind === "sliding"){
+    const n = model.panels, pw = gw / n, gap = 2;
+    for (let i=0;i<n;i++){
+      parts.push(`<rect x="${gx0+i*pw+gap}" y="${gy0+gap}" width="${pw-2*gap}" height="${gh-2*gap}" ${glassFill}/>`);
+    }
+    for (let i=1;i<n;i++){
+      parts.push(`<line x1="${gx0+i*pw}" y1="${gy0}" x2="${gx0+i*pw}" y2="${gy0+gh}" stroke="${frameCol}" stroke-width="3"/>`);
+    }
+  } else {
+    const n = model.panels, pw = gw / n;
+    for (let i=0;i<n;i++){
+      parts.push(`<rect x="${gx0+i*pw+3}" y="${gy0+3}" width="${pw-6}" height="${gh-6}" ${glassFill}/>`);
+    }
+    if (n === 2) parts.push(`<line x1="${gx0+pw}" y1="${gy0}" x2="${gx0+pw}" y2="${gy0+gh}" stroke="${frameCol}" stroke-width="4"/>`);
+  }
+
+  // dimension lines: DLO below, RO as a second line
+  const dimY = y0 + dh + 24, dimX = x0 - 24;
+  parts.push(`<line x1="${x0}" y1="${dimY}" x2="${x0+dw}" y2="${dimY}" stroke="#8b97a5" stroke-width="1"/>`);
+  parts.push(`<line x1="${x0}" y1="${dimY-4}" x2="${x0}" y2="${dimY+4}" stroke="#8b97a5"/>`);
+  parts.push(`<line x1="${x0+dw}" y1="${dimY-4}" x2="${x0+dw}" y2="${dimY+4}" stroke="#8b97a5"/>`);
+  parts.push(`<text x="${x0+dw/2}" y="${dimY+15}" fill="#8b97a5" font-size="11" text-anchor="middle">${num(w)} mm  ·  ${fracIn(w)}</text>`);
+  if (ro.w !== w){
+    parts.push(`<text x="${x0+dw/2}" y="${dimY+29}" fill="#e8a33d" font-size="10" text-anchor="middle">RO ${num(ro.w)} × ${num(ro.h)} mm</text>`);
+  }
+  parts.push(`<line x1="${dimX}" y1="${y0}" x2="${dimX}" y2="${y0+dh}" stroke="#8b97a5" stroke-width="1"/>`);
+  parts.push(`<line x1="${dimX-4}" y1="${y0}" x2="${dimX+4}" y2="${y0}" stroke="#8b97a5"/>`);
+  parts.push(`<line x1="${dimX-4}" y1="${y0+dh}" x2="${dimX+4}" y2="${y0+dh}" stroke="#8b97a5"/>`);
+  parts.push(`<text x="${dimX-7}" y="${y0+dh/2}" fill="#8b97a5" font-size="11" text-anchor="middle" transform="rotate(-90 ${dimX-7} ${y0+dh/2})">${num(h)} mm</text>`);
+
+  svg.innerHTML = parts.join("");
+}
+
+/* ---------- DXF ---------- */
+function dxf(cfg, model, ro){
+  const L = [];
+  const p = (a,b) => L.push(`0\nLINE\n8\n0\n10\n${a[0].toFixed(2)}\n20\n${a[1].toFixed(2)}\n30\n0\n11\n${b[0].toFixed(2)}\n21\n${b[1].toFixed(2)}\n31\n0`);
+  const rect = (x,y,w,h) => { p([x,y],[x+w,y]); p([x+w,y],[x+w,y+h]); p([x+w,y+h],[x,y+h]); p([x,y+h],[x,y]); };
+  const { w, h } = cfg;
+  const F = model.P.face;
+  rect(0,0,w,h);
+  rect(F,F,w-2*F,h-2*F);
+  if (model.panels > 1){
+    const pw = (w-2*F)/model.panels;
+    for (let i=1;i<model.panels;i++) p([F+i*pw, F],[F+i*pw, h-F]);
+  }
+  // glass panes
+  model.panes.forEach(pane => {
+    rect(F + model.P.stile, F + model.P.stile, Math.max(0,pane.w), Math.max(0,pane.h));
+  });
+  // RO marker
+  if (ro.w !== w) rect(-ro.w/2+w/2, -ro.h/2+h/2, ro.w, ro.h);
+
+  const head = `0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n`;
+  const foot = `0\nENDSEC\n0\nEOF\n`;
+  return head + L.join("\n") + "\n" + foot;
+}
+
+function downloadDxf(cfg, model, ro){
+  const blob = new Blob([dxf(cfg, model, ro)], { type:"application/dxf" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `fenestra-${cfg.op}-${cfg.w}x${cfg.h}.dxf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ---------- render ---------- */
+function readCfg(){
+  return {
+    op: el("op").value,
+    w: Math.max(300, +el("w").value || 300),
+    h: Math.max(300, +el("h").value || 300),
+    qty: Math.max(1, +el("qty").value || 1),
+    series: +el("series").value,
+    measure: el("measure").value,
+    itemType: el("itemType").value,
+    colourExt: el("colourExt").value,
+    colourInt: el("colourInt").value,
+    glass: el("glass").value,
+    hw: el("hw").value,
+    rush: el("rush").value,
+    screen: el("screen").checked,
+    margin: +el("margin").value
+  };
+}
+
+function render(){
+  const cfg = readCfg();
+  el("marginLbl").textContent = cfg.margin + "%";
+
+  const ext = COLOURS.find(c=>c.code===cfg.colourExt);
+  const int = COLOURS.find(c=>c.code===cfg.colourInt);
+  el("swExt").style.background = rgbCss(ext.rgb);
+  el("swInt").style.background = rgbCss(int.rgb);
+  el("twoTone").style.display = cfg.colourExt !== cfg.colourInt ? "" : "none";
+
+  const model = buildModel(cfg);
+  const ro = roughOpening(cfg);
+  const p = price(cfg, model);
+
+  draw(cfg, model, ro);
+
+  el("mSize").textContent = `${num(cfg.w)} × ${num(cfg.h)} mm`;
+  el("mRo").textContent = ro.w === cfg.w ? "—" : `${num(ro.w)} × ${num(ro.h)} mm (${ro.rule.label})`;
+  el("mArea").textContent = p.area.toFixed(2) + " m²";
+  el("mPanels").textContent = model.panels;
+  el("mBar").textContent = p.profileM.toFixed(1) + " m";
+
+  const rows = [
+    ["Aluminium (" + p.profileM.toFixed(1) + " m)", p.profile],
+    ["Glass (" + (model.glassArea*cfg.qty).toFixed(2) + " m²)", p.glassCost],
+    ["Hardware", p.hardware],
+    ["Screen", p.screen],
+    ["Labour & install", p.labour]
+  ];
+  if (p.rush) rows.push(["Rush order +" + Math.round(RATES.rush*100) + "%", p.rush]);
+  el("quote").innerHTML =
+    "<thead><tr><th>Item</th><th class='num'>Amount</th></tr></thead><tbody>" +
+    rows.map(([k,v]) => `<tr><td>${k}</td><td class="num">${peso(v)}</td></tr>`).join("") +
+    `<tr class="sub"><td>Subtotal</td><td class="num">${peso(p.sub)}</td></tr>` +
+    `<tr><td>Margin ${cfg.margin}%</td><td class="num">${peso(p.margin)}</td></tr>` +
+    "</tbody>";
+
+  el("total").textContent = peso(p.total);
+  el("perM2").textContent = peso(p.total / p.area);
+  el("perUnit").textContent = peso(p.total / cfg.qty);
+
+  el("cut").innerHTML =
+    "<thead><tr><th>Member</th><th class='num'>Length</th><th class='num'>Qty</th><th class='num'>Bars</th></tr></thead><tbody>" +
+    model.members.map(m => {
+      const bars = Math.ceil((m.len * m.qty) / RATES.stock);
+      return `<tr><td>${m.name}</td><td class="num">${num(m.len)}</td><td class="num">${m.qty}</td><td class="num">${bars}</td></tr>`;
+    }).join("") +
+    "</tbody>";
+
+  el("glassOut").innerHTML =
+    "<thead><tr><th>Pane</th><th class='num'>Size (mm)</th><th class='num'>m²</th></tr></thead><tbody>" +
+    model.panes.map((pane,i) => `<tr><td>Pane ${i+1}</td><td class="num">${num(pane.w)} × ${num(pane.h)}</td><td class="num">${(pane.w*pane.h/1e6).toFixed(2)}</td></tr>`).join("") +
+    "</tbody>";
+
+  const w = warnings(cfg, model);
+  el("warn").innerHTML = w.length
+    ? "<ul>" + w.map(t => `<li>${t}</li>`).join("") + "</ul>"
+    : '<span class="ok">No sizing issues detected.</span>';
+
+  window.__cfg = cfg; window.__model = model; window.__ro = ro;
+}
+
+/* ---------- init ---------- */
+[["colourExt","WH"],["colourInt","WH"]].forEach(([id, def]) => {
+  el(id).innerHTML = COLOURS.map(c =>
+    `<option value="${c.code}"${c.code===def?" selected":""}>${c.name}${c.custom?" (specify)":""}</option>`
+  ).join("");
+});
+
+["op","w","h","qty","series","measure","itemType","colourExt","colourInt","glass","hw","rush","screen","margin"]
+  .forEach(id => { el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
+
+el("dxfBtn").addEventListener("click", () => downloadDxf(window.__cfg, window.__model, window.__ro));
+
+render();
+</script>
+</body>
+</html>
